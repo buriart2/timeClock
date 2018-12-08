@@ -7,10 +7,10 @@
     tools:context=".MainActivity">
 
     <EditText
-        android:id="@+id/textView"
+        android:id="@+id/jobNumber"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="Enter Name"
+        android:hint="Job Number"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="0.464"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -19,7 +19,7 @@
         app:layout_constraintVertical_bias="0.288" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/in"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -36,7 +36,7 @@
         app:layout_constraintVertical_bias="0.498" />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/out"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"

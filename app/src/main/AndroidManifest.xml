@@ -9,7 +9,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme" >
-        <activity android:name=".MainActivity" >
+        <activity android:name=".MainActivity"/>
+        <activity android:parentActivityName=".Splash1"
+            android:launchMode="singleTop"
+            android:name=".Splash1"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

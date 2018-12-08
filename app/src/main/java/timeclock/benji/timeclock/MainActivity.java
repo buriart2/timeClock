@@ -2,6 +2,7 @@ package timeclock.benji.timeclock;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -31,15 +32,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        String headerTitle;
 
-        text = (EditText) findViewById(R.id.textView);
-        cin = (Button) findViewById(R.id.button);
-        class Employee {
-           String clockintime;
-           String clockoutime;
-           int outseconds;
-           int inseconds;
-        }
+        //text = (EditText) findViewById(R.id.textView);
+        //cin = (Button) findViewById(R.id.button);
+        Intent intent = getIntent();
+        headerTitle = intent.getStringExtra("name");
+        setTitle(headerTitle);
 
        
     }
