@@ -1,6 +1,8 @@
 package timeclock.benji.timeclock;
 
-public class Employee {
+import java.io.Serializable;
+
+public class Employee implements Serializable {
     private String fname;
     private String lname;
     private String clockintime;
@@ -17,10 +19,9 @@ public class Employee {
    // private int outseconds;
    // private int inseconds;
 
-    public Employee (String fname, String lname, String jobNumber) {
+    public Employee (String fname, String lname) {
         this.fname = fname;
         this.lname = lname;
-        this.jobNumber = jobNumber;
     }
 
     public String getFname() {
