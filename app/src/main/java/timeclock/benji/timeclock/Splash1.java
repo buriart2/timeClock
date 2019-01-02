@@ -1,7 +1,19 @@
 package timeclock.benji.timeclock;
 
+import android.Manifest;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -17,6 +29,7 @@ public class Splash1 extends AppCompatActivity implements Serializable {
 
     EditText input;
     Button submit;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +51,10 @@ public class Splash1 extends AppCompatActivity implements Serializable {
         startActivityForResult(mainScreen, 1);
         //System.out.println(input.getText().toString());
     }
+
+
+
+
 
 
 }

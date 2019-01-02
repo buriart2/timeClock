@@ -2,14 +2,21 @@ package timeclock.benji.timeclock;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.media.browse.MediaBrowser;
+import android.os.AsyncTask;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,6 +34,10 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -37,7 +48,7 @@ import java.util.Date;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.telephony.PhoneNumberUtils.compare;
 
-public class MainActivity extends AppCompatActivity implements Serializable  {
+public class MainActivity extends AppCompatActivity implements Serializable {
     EditText text, text2;
     EditText jobNum;
     Button cin;
@@ -51,6 +62,62 @@ public class MainActivity extends AppCompatActivity implements Serializable  {
     Employee employee;
     double longitude;
     double latitude;
+    String locationProvider = LocationManager.GPS_PROVIDER;
+    private LocationManager locationManager;
+
+    LocationListener locationListener = new LocationListener() {
+        public void onLocationChanged(Location location) {
+            // Called when a new location is found by the network location provider.
+            latitude = location.getLatitude();
+            longitude = location.getLongitude();
+            System.out.println("LATITUDE: " + location.getLatitude() + " LONGITUDE: " + location.getLongitude());
+            new getAddress().execute();
+        }
+
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+        }
+
+        public void onProviderEnabled(String provider) {
+        }
+
+        public void onProviderDisabled(String provider) {
+
+        }
+    };
+
+    public class getAddress extends AsyncTask<String,Void, String> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+            try {
+                String response;
+                HttpDataHandler http = new HttpDataHandler();
+                String url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + Double.toString(latitude) + "," + Double.toString(longitude) + "&key=AIzaSyDcP-8PXjLv5ZA34SV3F01t-9CPDcOpJ40";
+                response = http.GetHTTPData(url);
+                return response;
+
+            } catch (Exception ex) {
+
+            }
+            return null;
+        }
+
+        protected void onPostExecute(String s) {
+            try{
+                JSONObject jsonObject = new JSONObject(s);
+                String address = ((JSONArray)jsonObject.get("results")).getJSONObject(0).get("formatted_address").toString();
+                System.out.println("ADDRESS: " + address);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
 
 
@@ -70,16 +137,28 @@ public class MainActivity extends AppCompatActivity implements Serializable  {
         employee = (Employee) intent.getSerializableExtra("Employee");
         setTitle(employee.getFname());
 
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.INTERNET
+            }, 10);
+
+            return;
+        }
+
 
     }
+
 
     public void clockIn(View view) throws ParseException {
         //  String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
         //AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-       // Toast.makeText(this, "Clock in has been recorded",
-         //       Toast.LENGTH_LONG).show();
-       // clockinbtn.setEnabled(false);
-       // clockoutbtn.setEnabled(true);
+        // Toast.makeText(this, "Clock in has been recorded",
+        //       Toast.LENGTH_LONG).show();
+        // clockinbtn.setEnabled(false);
+        // clockoutbtn.setEnabled(true);
 
         employee.setJobNumber(jobNum.getText().toString());
         System.out.println("JOB NUMBER: " + employee.getJobNumber());
@@ -94,14 +173,47 @@ public class MainActivity extends AppCompatActivity implements Serializable  {
 
         this.text = new EditText(this);
         text.setText(clockintime);
-        //cin.setEnabled(false);
-        //  placeName.setHint("Name of Place");
-        //layout.addView(text);
-        //dialog.setView(layout);
-
-        //dialog.show();
 
 
+        // Register the listener with the Location Manager to receive location updates
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.INTERNET
+            }, 10);
+            return;
+        } else {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3600000, 0, locationListener);
+        }
+
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case 10:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        return;
+                    }
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3600000, 0, locationListener);
+                }
+                else {
+                    AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+                    alertDialog.setTitle("Permission Needed");
+                    alertDialog.setMessage("Without location permissions, this application cannot work as intended.");
+                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                    alertDialog.show();
+                    System.out.println("DENIED");
+            }
+                return;
+        }
     }
 
 
@@ -131,6 +243,8 @@ public class MainActivity extends AppCompatActivity implements Serializable  {
 
         //dialog.show();
     }
+
+
 
 
 }
