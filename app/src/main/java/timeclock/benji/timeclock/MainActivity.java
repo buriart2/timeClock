@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -60,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     Date d1 = null;
     Date d2 = null;
     Employee employee;
+    SharedPreferences sharedPref;
     double longitude;
     double latitude;
     String locationProvider = LocationManager.GPS_PROVIDER;
@@ -120,7 +122,6 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     }
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -131,11 +132,14 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         clockinbtn = (Button) findViewById(R.id.in);
         clockoutbtn.setEnabled(false);
 
-        //text = (EditText) findViewById(R.id.textView);
-        //cin = (Button) findViewById(R.id.button);
         Intent intent = getIntent();
         employee = (Employee) intent.getSerializableExtra("Employee");
-        setTitle(employee.getFname());
+        sharedPref = (SharedPreferences) intent.getSerializableExtra("sharedPref");
+       // setTitle(employee.getFname());
+
+        sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+        String value = sharedPref.getString("isLoggedIn", "");
+        System.out.println("VALUE IS " + value);
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
@@ -153,13 +157,6 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 
 
     public void clockIn(View view) throws ParseException {
-        //  String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
-        //AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-        // Toast.makeText(this, "Clock in has been recorded",
-        //       Toast.LENGTH_LONG).show();
-        // clockinbtn.setEnabled(false);
-        // clockoutbtn.setEnabled(true);
-
         employee.setJobNumber(jobNum.getText().toString());
         System.out.println("JOB NUMBER: " + employee.getJobNumber());
         Calendar calendar = Calendar.getInstance();
@@ -167,12 +164,11 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         clockintime = mdformat.format(calendar.getTime());
         d1 = mdformat.parse(clockintime);
         inseconds = calendar.get(Calendar.SECOND);
-
-        //LinearLayout layout = new LinearLayout(this);
-        //layout.setOrientation(LinearLayout.VERTICAL);
-
         this.text = new EditText(this);
         text.setText(clockintime);
+
+        Toast.makeText(MainActivity.this, "Clock In recorded.",
+                Toast.LENGTH_LONG).show();
 
 
         // Register the listener with the Location Manager to receive location updates
@@ -185,6 +181,8 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         } else {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3600000, 0, locationListener);
         }
+        System.out.println("clock in done");
+        clockoutbtn.setEnabled(true);
 
 
     }
@@ -218,18 +216,11 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 
 
     public void clockOut(View view) throws ParseException {
-       // Toast.makeText(this, "Clock out has been recorded",
-         //       Toast.LENGTH_LONG).show();
-
-        // AlertDialog.Builder dialog = new AlertDialog.Builder(this);
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat mdformat = new SimpleDateFormat("hh:mm:ss");
         clockouttime = mdformat.format(calendar.getTime());
         d2 = mdformat.parse(clockouttime);
         outseconds = calendar.get(Calendar.SECOND);
-        //Double difference = Double.parseDouble(clockintime) - Double.parseDouble(clockouttime);
-        //LinearLayout layout = new LinearLayout(this);
-        //layout.setOrientation(LinearLayout.VERTICAL);
         long diff = d2.getTime() - d1.getTime();
         long diffSeconds = diff / 1000 % 60;
         long diffMinutes = diff / (60 * 1000) % 60;
@@ -237,11 +228,27 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         System.out.println("you worked " + diffMinutes + " minutes and " + diffSeconds + " seconds");
         this.text2 = new EditText(this);
         text2.setText(clockouttime);
-        //  placeName.setHint("Name of Place");
-        //layout.addView(text2);
-        //dialog.setView(layout);
 
-        //dialog.show();
+        Toast.makeText(MainActivity.this, "Clock In recorded.",
+                Toast.LENGTH_LONG).show();
+
+        // Register the listener with the Location Manager to receive location updates
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.INTERNET
+            }, 10);
+            return;
+        } else {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3600000, 0, locationListener);
+        }
+
+
+
+    }
+
+    @Override
+    public void onBackPressed() {
     }
 
 

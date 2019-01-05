@@ -8,16 +8,10 @@ public class Employee implements Serializable {
     private String clockintime;
     private String clockoutime;
     private String jobNumber;
-   // private String latIn;
-   // private String longIn;
-   // private String latOut;
-   // private String longOut;
-    private String inAddress;
-    private String outAddress;
+    private String inAddress = "";
+    private String outAddress = "";
     private String currentDate;
-    private int hoursWorked;
-   // private int outseconds;
-   // private int inseconds;
+    private int hoursWorked = 0;
 
     public Employee (String fname, String lname) {
         this.fname = fname;
